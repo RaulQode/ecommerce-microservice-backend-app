@@ -15,11 +15,13 @@ jobs:
   build-and-test:
     name: Build and Test All Services
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     permissions:
       contents: read
       packages: write
 
     strategy:
+      fail-fast: false
       matrix:
         service:
           - service-discovery
@@ -68,15 +70,14 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/${{ matrix.service }}
           tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha,prefix=prod-
             type=raw,value=latest
+            type=sha,prefix=prod-
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./${{ matrix.service }}
+          context: .
+          file: ./${{ matrix.service }}/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -84,6 +85,7 @@ jobs:
   integration-tests:
     name: Run Integration Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: build-and-test
     steps:
       - name: Checkout code
@@ -106,6 +108,7 @@ jobs:
   e2e-tests:
     name: Run E2E Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: build-and-test
     steps:
       - name: Checkout code
@@ -136,6 +139,7 @@ jobs:
   deploy-to-production:
     name: Deploy to Production Kubernetes
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [build-and-test, integration-tests, e2e-tests]
     steps:
       - name: Checkout code
@@ -195,6 +199,7 @@ jobs:
   generate-release-notes:
     name: Generate Release Notes
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: deploy-to-production
     permissions:
       contents: write

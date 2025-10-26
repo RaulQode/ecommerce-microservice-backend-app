@@ -14,11 +14,13 @@ jobs:
   build:
     name: Build Services
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     permissions:
       contents: read
       packages: write
 
     strategy:
+      fail-fast: false
       matrix:
         service:
           - service-discovery
@@ -67,7 +69,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./${{ matrix.service }}
+          context: .
+          file: ./${{ matrix.service }}/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -75,6 +78,7 @@ jobs:
   deploy-to-k8s:
     name: Deploy to Kubernetes
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: build
     steps:
       - name: Checkout code
@@ -134,6 +138,7 @@ jobs:
   integration-tests:
     name: Run Integration Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: deploy-to-k8s
     steps:
       - name: Checkout code
