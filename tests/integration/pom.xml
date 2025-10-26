@@ -11,10 +11,10 @@
     </parent>
 
     <groupId>com.selimhorri</groupId>
-    <artifactId>unit-tests</artifactId>
+    <artifactId>integration-tests</artifactId>
     <version>0.1.0</version>
-    <name>unit-tests</name>
-    <description>Unit tests for microservices</description>
+    <name>integration-tests</name>
+    <description>Integration tests for microservices</description>
 
     <properties>
         <java.version>11</java.version>
@@ -23,6 +23,10 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -34,14 +38,8 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-junit-jupiter</artifactId>
-            <scope>test</scope>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
         </dependency>
     </dependencies>
 

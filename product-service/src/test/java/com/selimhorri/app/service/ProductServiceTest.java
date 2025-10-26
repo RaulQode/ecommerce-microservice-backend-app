@@ -1,5 +1,6 @@
 package com.selimhorri.app.service;
 
+import com.selimhorri.app.dto.ProductDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -7,7 +8,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
@@ -31,19 +31,21 @@ class ProductServiceTest {
 
     @BeforeEach
     void setUp() {
-        testProduct = new ProductDto();
-        testProduct.setProductId(1);
-        testProduct.setProductTitle("Test Product");
-        testProduct.setSku("TEST-001");
-        testProduct.setPriceUnit(new BigDecimal("99.99"));
-        testProduct.setQuantity(100);
+        testProduct = ProductDto.builder()
+                .productId(1)
+                .productTitle("Test Product")
+                .sku("TEST-001")
+                .priceUnit(99.99)
+                .quantity(100)
+                .build();
     }
 
     @Test
     @DisplayName("Should find all products successfully")
     void testFindAllProducts() {
         // Given
-        List<ProductDto> expectedProducts = Arrays.asList(testProduct, new ProductDto());
+        ProductDto secondProduct = ProductDto.builder().productId(2).productTitle("Second Product").build();
+        List<ProductDto> expectedProducts = Arrays.asList(testProduct, secondProduct);
         when(productService.findAll()).thenReturn(expectedProducts);
 
         // When
@@ -68,7 +70,7 @@ class ProductServiceTest {
         assertNotNull(foundProduct);
         assertEquals("Test Product", foundProduct.getProductTitle());
         assertEquals("TEST-001", foundProduct.getSku());
-        assertEquals(new BigDecimal("99.99"), foundProduct.getPriceUnit());
+        assertEquals(99.99, foundProduct.getPriceUnit());
         verify(productService, times(1)).findById(1);
     }
 
@@ -92,45 +94,28 @@ class ProductServiceTest {
     @DisplayName("Should update product successfully")
     void testUpdateProduct() {
         // Given
-        testProduct.setPriceUnit(new BigDecimal("79.99"));
-        when(productService.update(anyInt(), any(ProductDto.class))).thenReturn(testProduct);
+        ProductDto updatedData = ProductDto.builder()
+                .productId(1)
+                .productTitle("Test Product")
+                .sku("TEST-001")
+                .priceUnit(79.99)
+                .quantity(100)
+                .build();
+        when(productService.update(anyInt(), any(ProductDto.class))).thenReturn(updatedData);
 
         // When
-        ProductDto updatedProduct = productService.update(1, testProduct);
+        ProductDto updatedProduct = productService.update(1, updatedData);
 
         // Then
         assertNotNull(updatedProduct);
-        assertEquals(new BigDecimal("79.99"), updatedProduct.getPriceUnit());
+        assertEquals(79.99, updatedProduct.getPriceUnit());
         verify(productService, times(1)).update(anyInt(), any(ProductDto.class));
     }
 
     @Test
     @DisplayName("Should validate product price is positive")
     void testProductPriceValidation() {
-        // Given
-        testProduct.setPriceUnit(new BigDecimal("99.99"));
-
         // Then
-        assertTrue(testProduct.getPriceUnit().compareTo(BigDecimal.ZERO) > 0);
-    }
-
-    // Simple DTO class for testing
-    static class ProductDto {
-        private Integer productId;
-        private String productTitle;
-        private String sku;
-        private BigDecimal priceUnit;
-        private Integer quantity;
-
-        public Integer getProductId() { return productId; }
-        public void setProductId(Integer productId) { this.productId = productId; }
-        public String getProductTitle() { return productTitle; }
-        public void setProductTitle(String productTitle) { this.productTitle = productTitle; }
-        public String getSku() { return sku; }
-        public void setSku(String sku) { this.sku = sku; }
-        public BigDecimal getPriceUnit() { return priceUnit; }
-        public void setPriceUnit(BigDecimal priceUnit) { this.priceUnit = priceUnit; }
-        public Integer getQuantity() { return quantity; }
-        public void setQuantity(Integer quantity) { this.quantity = quantity; }
+        assertTrue(testProduct.getPriceUnit() > 0);
     }
 }
